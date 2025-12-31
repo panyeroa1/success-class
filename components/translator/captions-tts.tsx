@@ -23,6 +23,7 @@ export const CaptionsTTS = ({ localUserId }: CaptionsTTSProps) => {
   const targetLang = useTranslatorStore((state) => state.targetLang);
   const ttsEnabled = useTranslatorStore((state) => state.ttsEnabled);
   const ttsVoice = useTranslatorStore((state) => state.ttsVoice);
+  const setIsTtsPlaying = useTranslatorStore((state) => state.setIsTtsPlaying);
 
   const spokenRef = useRef(new Set<string>());
   const queueRef = useRef<QueueItem[]>([]);
@@ -64,6 +65,8 @@ export const CaptionsTTS = ({ localUserId }: CaptionsTTSProps) => {
       const audio = new Audio(url);
       audioRef.current = audio;
       audioUrlRef.current = url;
+      audio.playsInline = true;
+      audio.crossOrigin = "anonymous";
 
       audio.onended = () => {
         if (audioUrlRef.current) {
@@ -71,6 +74,7 @@ export const CaptionsTTS = ({ localUserId }: CaptionsTTSProps) => {
           audioUrlRef.current = null;
         }
         audioRef.current = null;
+        setIsTtsPlaying(false);
         if (useTranslatorStore.getState().ttsEnabled) {
           void playNext();
         } else {
@@ -83,6 +87,7 @@ export const CaptionsTTS = ({ localUserId }: CaptionsTTSProps) => {
           audioUrlRef.current = null;
         }
         audioRef.current = null;
+        setIsTtsPlaying(false);
         if (useTranslatorStore.getState().ttsEnabled) {
           void playNext();
         } else {
@@ -91,8 +96,10 @@ export const CaptionsTTS = ({ localUserId }: CaptionsTTSProps) => {
       };
 
       await audio.play();
+      setIsTtsPlaying(true);
     } catch {
       playingRef.current = false;
+      setIsTtsPlaying(false);
       if (useTranslatorStore.getState().ttsEnabled) {
         void playNext();
       }

@@ -59,84 +59,65 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Text too long" }, { status: 413 });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
+  const cartesiaKey = process.env.CARTESIA_API_KEY;
+  if (!cartesiaKey) {
     return NextResponse.json(
-      { error: "Gemini API key is not configured" },
+      { error: "Cartesia API key is not configured" },
       { status: 500 }
     );
   }
 
-  const model =
-    process.env.GEMINI_TTS_MODEL ??
-    "models/gemini-2.5-flash-native-audio-preview-12-2025";
-  const modelPath = model.startsWith("models/") ? model : `models/${model}`;
-  const prompt = lang ? `Speak in ${lang}. ${text}` : text;
+  const modelId = process.env.CARTESIA_TTS_MODEL_ID || "sonic-3";
+  const voiceId =
+    voice || process.env.CARTESIA_TTS_VOICE_ID || "9c7e6604-52c6-424a-9f9f-2c4ad89f3bb9";
 
-  const body: Record<string, unknown> = {
-    contents: [
-      {
-        role: "user",
-        parts: [{ text: prompt }],
-      },
-    ],
-    generationConfig: {
-      responseModalities: ["AUDIO"],
-      temperature: 0.2,
-      ...(voice
-        ? {
-            speechConfig: {
-              voiceConfig: {
-                prebuiltVoiceConfig: {
-                  voiceName: voice,
-                },
-              },
-            },
-          }
-        : {}),
+  const requestPayload = {
+    model_id: modelId,
+    transcript: text,
+    voice: {
+      mode: "id",
+      id: voiceId,
     },
+    output_format: {
+      container: "wav",
+      encoding: "pcm_f32le",
+      sample_rate: 44100,
+    },
+    speed: "normal",
+    generation_config: {
+      speed: 1,
+      volume: 1,
+    },
+    ...(lang ? { language: lang } : {}),
   };
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 12000);
 
   try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/${modelPath}:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-        signal: controller.signal,
-      }
-    );
+    const response = await fetch("https://api.cartesia.ai/tts/bytes", {
+      method: "POST",
+      headers: {
+        "Cartesia-Version": "2025-04-16",
+        "X-API-Key": cartesiaKey,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestPayload),
+      signal: controller.signal,
+    });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Cartesia TTS failed", response.status, errorText);
       return NextResponse.json(
         { error: "TTS request failed" },
         { status: 502 }
       );
     }
 
-    const data = (await response.json()) as {
-      candidates?: Array<{
-        content?: { parts?: Array<{ inlineData?: { data?: string; mimeType?: string } }> };
-      }>;
-    };
-
-    const inlineData = data.candidates?.[0]?.content?.parts?.find(
-      (part) => part.inlineData?.data
-    )?.inlineData;
-
-    if (!inlineData?.data) {
-      return NextResponse.json(
-        { error: "No audio returned" },
-        { status: 502 }
-      );
-    }
-
-    const buffer = Buffer.from(inlineData.data, "base64");
-    const mimeType = inlineData.mimeType || "audio/mpeg";
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    const mimeType = "audio/wav";
 
     return new NextResponse(buffer, {
       status: 200,

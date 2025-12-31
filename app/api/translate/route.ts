@@ -81,15 +81,44 @@ export async function POST(req: Request) {
     return NextResponse.json({ translatedText: cached.value });
   }
 
+  const tryGoogleFree = async () => {
+    try {
+      const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${encodeURIComponent(
+        sourceLang
+      )}&tl=${encodeURIComponent(targetLang)}&dt=t&q=${encodeURIComponent(
+        text
+      )}`;
+      const response = await fetch(url);
+      if (!response.ok) {
+        return null;
+      }
+      const data = (await response.json()) as [Array<[string]>];
+      const translatedText = data?.[0]?.map((entry) => entry[0]).join("") ?? "";
+      if (!translatedText) return null;
+      return translatedText;
+    } catch (error) {
+      console.error("Translation API: Google free translate failed", error);
+      return null;
+    }
+  };
+
+  const googleResult = await tryGoogleFree();
+  if (googleResult) {
+    cache.set(cacheKey, { value: googleResult, ts: Date.now() });
+    pruneCache();
+    return NextResponse.json({ translatedText: googleResult });
+  }
+
   const geminiApiKey = process.env.GEMINI_API_KEY;
   if (!geminiApiKey) {
     return NextResponse.json(
-      { error: "Gemini API key is not configured" },
-      { status: 500 }
+      { error: "Translation unavailable" },
+      { status: 502 }
     );
   }
 
-  const model = process.env.GEMINI_TRANSLATE_MODEL ?? "gemini-flash-latest-lite";
+  const model =
+    process.env.GEMINI_TRANSLATE_MODEL ?? "gemini-flash-lite-latest";
   const primaryModel = model.startsWith("models/") ? model : `models/${model}`;
   const fallbackModel = "models/gemini-flash-latest-lite";
 

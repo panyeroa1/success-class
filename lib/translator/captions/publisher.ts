@@ -22,6 +22,7 @@ type CaptionPublisherOptions = {
   speakerName?: string;
   sourceLang: string;
   maxEventChars?: number;
+  shouldCapture?: () => boolean;
 };
 
 const DEFAULT_MAX_EVENT_CHARS = 3200;
@@ -52,8 +53,14 @@ const createUtteranceId = () => {
 };
 
 export const createCaptionPublisher = (options: CaptionPublisherOptions) => {
-  const { call, speakerUserId, speakerName, sourceLang, maxEventChars } =
-    options;
+  const {
+    call,
+    speakerUserId,
+    speakerName,
+    sourceLang,
+    maxEventChars,
+    shouldCapture,
+  } = options;
   const maxChars = maxEventChars ?? DEFAULT_MAX_EVENT_CHARS;
   const resolvedSourceLang = sourceLang || "auto";
   let active = false;
@@ -71,6 +78,7 @@ export const createCaptionPublisher = (options: CaptionPublisherOptions) => {
   };
 
   const handleResult = (result: TranscriptResult) => {
+    if (shouldCapture && !shouldCapture()) return;
     if (!active) return;
     const text = result.text.trim();
     if (!text) return;

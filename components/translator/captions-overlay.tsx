@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { cn } from "@/lib/utils";
 import { useTranslatorStore } from "@/store/use-translator";
@@ -14,53 +14,70 @@ export const CaptionsOverlay = () => {
   );
   const targetLang = useTranslatorStore((state) => state.targetLang);
 
-  const visibleCaptions = useMemo(() => {
+  const latestCaption = useMemo(() => {
     const sorted = [...captions].sort((a, b) => a.ts - b.ts);
-    return sorted.slice(-2);
+    return sorted[sorted.length - 1];
   }, [captions]);
 
-  if (!enabled && visibleCaptions.length === 0) return null;
+  const [activeCaption, setActiveCaption] = useState<typeof latestCaption>();
+
+  useEffect(() => {
+    if (!latestCaption) return;
+    setActiveCaption(latestCaption);
+
+    const timer = setTimeout(() => {
+      setActiveCaption(undefined);
+    }, 4000);
+
+    return () => clearTimeout(timer);
+  }, [latestCaption]);
+
+  if (!enabled && !activeCaption) return null;
 
   return (
     <div className="pointer-events-none fixed bottom-24 left-1/2 z-40 flex w-full max-w-[min(920px,95vw)] -translate-x-1/2 flex-col gap-2">
-      {visibleCaptions.map((caption) => {
-        const showTranslation =
-          autoTranslateEnabled && Boolean(targetLang) && caption.translatedText;
-        return (
-          <div
-            key={caption.utteranceId}
-            className={cn(
-              "flex w-full flex-col gap-1 rounded-lg bg-black/70 px-4 py-2 text-white shadow-lg backdrop-blur-md"
+      {activeCaption && (
+        <div
+          key={activeCaption.utteranceId}
+          className={cn(
+            "flex w-full flex-col gap-1 rounded-lg bg-black/70 px-4 py-2 text-white shadow-lg backdrop-blur-md transition-opacity duration-300"
+          )}
+        >
+          <div className="flex items-center gap-2 overflow-hidden">
+            {activeCaption.speakerName && (
+              <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider text-sky-400">
+                {activeCaption.speakerName}:
+              </span>
             )}
-          >
-            <div className="flex items-center gap-2 overflow-hidden">
-              {caption.speakerName && (
-                <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider text-sky-400">
-                  {caption.speakerName}:
-                </span>
-              )}
-              <div className="min-w-0 flex-1 truncate whitespace-nowrap text-sm font-medium">
-                {caption.text}
-              </div>
+            <div className="min-w-0 flex-1 truncate whitespace-nowrap text-sm font-medium">
+              {activeCaption.text}
             </div>
-            {showTranslation && (
+          </div>
+          {autoTranslateEnabled &&
+            Boolean(targetLang) &&
+            activeCaption.translatedText && (
               <div className="flex items-baseline gap-2 border-t border-white/5 pt-1 text-sm font-semibold text-lime-400">
                 <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider">
                   Translation:
                 </span>
                 <div className="min-w-0 flex-1 truncate whitespace-nowrap">
-                  {caption.translatedText}
+                  {activeCaption.translatedText}
                 </div>
               </div>
             )}
-            {!showTranslation && showOriginal && caption.translatedText && (
+          {!(
+            autoTranslateEnabled &&
+            Boolean(targetLang) &&
+            activeCaption.translatedText
+          ) &&
+            showOriginal &&
+            activeCaption.translatedText && (
               <div className="border-t border-white/5 pt-1 text-sm text-white/50 truncate whitespace-nowrap italic">
-                {caption.translatedText}
+                {activeCaption.translatedText}
               </div>
             )}
-          </div>
-        );
-      })}
+        </div>
+      )}
     </div>
   );
 };

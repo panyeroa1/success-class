@@ -175,6 +175,7 @@ export const MeetingRoom = () => {
       speakerUserId: localParticipant.userId,
       speakerName: localParticipant.name ?? localParticipant.userId,
       sourceLang: speakerLang,
+      shouldCapture: () => !useTranslatorStore.getState().isTtsPlaying,
     });
 
     publisherRef.current = publisher;
@@ -196,7 +197,7 @@ export const MeetingRoom = () => {
   useEffect(() => {
     if (!call) return;
 
-    const translatePartialThrottleMs = 600;
+    const translatePartialThrottleMs = 300;
 
     const translateCaption = async (caption: {
       utteranceId: string;
