@@ -4,6 +4,14 @@ import { useState } from "react";
 import { Globe } from "lucide-react";
 
 import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -11,8 +19,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useTTS } from "./tts-provider";
-import { Check } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 export function TranslationSidebar({
   children,
