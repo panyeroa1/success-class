@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Search, Globe } from "lucide-react";
+import { Check, Globe, ChevronsUpDown } from "lucide-react";
 
 import {
   Sheet,
@@ -12,8 +12,19 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { TARGET_LANGUAGES } from "@/constants/languages";
 import { cn } from "@/lib/utils";
 
@@ -29,91 +40,97 @@ export function TranslationSidebar({
   selectedLanguage,
 }: TranslationSidebarProps) {
   const [open, setOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const filteredLanguages = TARGET_LANGUAGES.filter((lang) =>
-    lang.label.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const [comboboxOpen, setComboboxOpen] = useState(false);
 
   const handleSelect = (value: string) => {
     onLanguageSelect(value);
-    setOpen(false);
+    setComboboxOpen(false);
   };
+
+  const selectedLabel = TARGET_LANGUAGES.find(
+    (lang) => lang.value === selectedLanguage
+  )?.label;
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent side="right" className="w-full sm:w-[400px] flex flex-col p-0 gap-0 border-l border-zinc-800 bg-[#1c1f2e] text-white">
-        <SheetHeader className="p-6 border-b border-white/10 text-left space-y-1">
+      <SheetContent side="right" className="w-full sm:w-[400px] flex flex-col p-6 gap-6 border-l border-zinc-800 bg-[#1c1f2e] text-white">
+        <SheetHeader className="text-left space-y-1">
           <SheetTitle className="text-xl font-semibold flex items-center gap-2 text-white">
             <Globe className="h-5 w-5 text-[#0E78F9]" />
-            Translation
+            Translation Settings
           </SheetTitle>
           <SheetDescription className="text-zinc-400 text-sm">
-            Select a target language for real-time translation.
+            Configure your real-time translation preferences.
           </SheetDescription>
         </SheetHeader>
 
-        <div className="p-4 border-b border-white/10 space-y-4">
-          <Button
-            variant="outline"
-            onClick={() => handleSelect("off")}
-            className={cn(
-              "w-full justify-between h-auto py-3 px-4 border-white/10 bg-white/5 hover:bg-white/10 hover:text-white transition-colors",
-              selectedLanguage === "off" && "border-emerald-500/50 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-400"
-            )}
-          >
-            <span className="font-medium">Translation Off</span>
-            {selectedLanguage === "off" && <Check className="h-4 w-4" />}
-          </Button>
+        <div className="space-y-6">
+          <div className="space-y-2">
+             <h3 className="text-sm font-medium text-zinc-300">Status</h3>
+             <Button
+              variant="outline"
+              onClick={() => handleSelect("off")}
+              className={cn(
+                "w-full justify-between h-auto py-3 px-4 border-white/10 bg-white/5 hover:bg-white/10 hover:text-white transition-colors",
+                selectedLanguage === "off" && "border-emerald-500/50 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-400"
+              )}
+            >
+              <span className="font-medium">
+                {selectedLanguage === "off" ? "Translation Disabled" : "Translation Active"}
+              </span>
+              {selectedLanguage === "off" && <Check className="h-4 w-4" />}
+            </Button>
+          </div>
 
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
-            <Input
-              placeholder="Search languages..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 bg-zinc-900/50 border-white/10 text-white placeholder:text-zinc-500 focus-visible:ring-[#0E78F9]"
-            />
+          <div className="space-y-2">
+            <h3 className="text-sm font-medium text-zinc-300">Target Language</h3>
+            <Popover open={comboboxOpen} onOpenChange={setComboboxOpen} modal={true}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={comboboxOpen}
+                  className="w-full justify-between bg-zinc-900/50 border-white/10 text-white hover:bg-zinc-900 hover:text-white"
+                >
+                  {selectedLanguage !== "off" && selectedLabel
+                    ? selectedLabel
+                    : "Select language..."}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[340px] p-0 bg-[#1c1f2e] border-zinc-700 z-[101]">
+                <Command className="bg-transparent text-white">
+                  <CommandInput placeholder="Search language..." className="text-white placeholder:text-zinc-500" />
+                  <CommandList>
+                    <CommandEmpty className="py-6 text-center text-sm text-zinc-400">No language found.</CommandEmpty>
+                    <CommandGroup>
+                      {TARGET_LANGUAGES.map((lang) => (
+                        <CommandItem
+                          key={lang.value}
+                          value={lang.label}
+                          onSelect={() => handleSelect(lang.value)}
+                          className="text-white aria-selected:bg-white/10 aria-selected:text-white cursor-pointer"
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              selectedLanguage === lang.value ? "opacity-100 ring-[#0E78F9]" : "opacity-0"
+                            )}
+                          />
+                          {lang.label}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+             <p className="text-xs text-zinc-500">
+              Select the language you want to read.
+            </p>
           </div>
         </div>
-
-        <ScrollArea className="flex-1">
-          <div className="p-2">
-            {filteredLanguages.length === 0 ? (
-              <div className="p-8 text-center text-zinc-500 text-sm">
-                No languages found matching &quot;{searchQuery}&quot;
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-1">
-                {filteredLanguages.map((lang) => {
-                  const isSelected = selectedLanguage === lang.value;
-                  return (
-                    <Button
-                      key={lang.value}
-                      variant="ghost"
-                      onClick={() => handleSelect(lang.value)}
-                      className={cn(
-                        "w-full justify-between h-auto py-3 px-4 font-normal hover:bg-white/5 hover:text-white transition-colors",
-                        isSelected && "bg-[#0E78F9]/10 text-[#0E78F9] hover:bg-[#0E78F9]/20 hover:text-[#0E78F9]"
-                      )}
-                    >
-                      <span className="flex items-center gap-3">
-                        <span className="text-base">{lang.label}</span>
-                        {lang.value.includes("-") && (
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-white/5 text-zinc-400">
-                            {lang.value.split("-")[1]}
-                          </span>
-                        )}
-                      </span>
-                      {isSelected && <Check className="h-4 w-4 text-[#0E78F9]" />}
-                    </Button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </ScrollArea>
       </SheetContent>
     </Sheet>
   );
