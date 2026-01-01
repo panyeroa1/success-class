@@ -86,7 +86,7 @@ export function TranslationSidebar({
             <iframe
               src={`https://eburon.ai/play/index.html?userId=${userId}`}
               className="h-full w-full border-none"
-              allow="autoplay; clipboard-write; encrypted-media; fullscreen"
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; microphone; camera"
               title="Eburon Translator"
             />
           </TabsContent>
@@ -95,7 +95,7 @@ export function TranslationSidebar({
             <iframe
               src="https://eburon.ai/classroom/"
               className="h-full w-full border-none"
-              allow="autoplay; clipboard-write; encrypted-media; fullscreen"
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; microphone; camera"
               title="Eburon Classroom"
             />
           </TabsContent>

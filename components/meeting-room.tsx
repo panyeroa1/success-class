@@ -10,7 +10,7 @@ import {
   useCall,
   useCallStateHooks,
 } from "@stream-io/video-react-sdk";
-import { ClosedCaption, LayoutList, Users, ChevronDown, Languages, GraduationCap } from "lucide-react";
+import { ClosedCaption, LayoutList, Users, ChevronDown, Languages, GraduationCap, Globe } from "lucide-react";
 import { signInAnonymously } from "@/lib/supabase";
 import { useUser } from "@clerk/nextjs";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -192,6 +192,8 @@ export const MeetingRoom = () => {
   // Prioritize Clerk User ID if available, otherwise fallback to Anonymous Supabase ID
   const effectiveUserId = user?.id || sbUserId || "";
 
+  const [videoError, setVideoError] = useState(false);
+
   return (
     <TTSProvider initialUserId={effectiveUserId}>
       <div className="relative min-h-screen w-full overflow-hidden text-white">
@@ -212,17 +214,33 @@ export const MeetingRoom = () => {
         {/* Video Pinned AI Host */}
         {isClassroomActive && (
           <div className="fixed inset-4 z-40 flex items-center justify-center bg-black/40 backdrop-blur-md rounded-3xl border border-white/20 overflow-hidden shadow-2xl shadow-purple-500/20">
-            <video 
-              className="size-full object-cover"
-              autoPlay
-              loop
-              muted
-              playsInline
-              title="Classroom AI Host"
-            >
-              <source src="https://eburon.ai/claude/video.mp4" type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
+            {!videoError ? (
+              <video 
+                src="https://eburon.ai/claude/video.mp4"
+                className="size-full object-cover"
+                autoPlay
+                loop
+                muted
+                playsInline
+                title="Classroom AI Host"
+                onError={(e) => {
+                  console.error("AI Host Video Error:", e);
+                  setVideoError(true);
+                }}
+              />
+            ) : (
+              <div className="flex flex-col items-center gap-4 text-center p-10">
+                <Globe className="size-16 text-zinc-600 animate-pulse" />
+                <p className="text-xl font-bold text-zinc-400">Classroom Host is currently unavailable.</p>
+                <p className="text-sm text-zinc-500 max-w-xs">We encountered an issue loading the video source. Please try again later or check your connection.</p>
+                <button 
+                  onClick={() => setVideoError(false)}
+                  className="mt-4 px-6 py-2 rounded-full bg-white/10 hover:bg-white/20 text-sm transition-colors"
+                >
+                  Retry Loading
+                </button>
+              </div>
+            )}
           </div>
         )}
 
