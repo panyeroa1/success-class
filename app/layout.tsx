@@ -31,12 +31,12 @@ const AppLayout = ({ children }: Readonly<PropsWithChildren>) => {
       <ClerkProvider
         appearance={{
           layout: {
-            logoImageUrl: "/images/logo.png",
+            logoImageUrl: "https://assets.cdn.filesafe.space/CIoDjNuoDah4NuMMfWMQ/media/643b5be449341f3eb47abe34.png",
             socialButtonsVariant: "iconButton",
           },
           variables: {
             colorText: "#FFF",
-            colorPrimary: "#2BB6F7",
+            colorPrimary: "#A855F7", // Purple matching the theme
             colorBackground: "#0B0D10",
             colorInputBackground: "#12151B",
             colorInputText: "#FFF",

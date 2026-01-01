@@ -48,10 +48,10 @@ export default function LandingPage() {
 
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
               <Link
-                href={isSignedIn ? "/home" : "/sign-in"}
+                href="/sign-in"
                 className="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 font-bold text-lg transition-all shadow-xl shadow-purple-500/20 active:scale-[0.98]"
               >
-                {isSignedIn ? "Go to Classroom" : "Start Your Journey"}
+                Get Started
               </Link>
               <Link
                 href="#how-it-works"
