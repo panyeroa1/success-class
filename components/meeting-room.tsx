@@ -30,6 +30,7 @@ import { useDeepgramSTT } from "@/hooks/use-deepgram-stt";
 import { EndCallButton } from "./end-call-button";
 import { Loader } from "./loader";
 import { TranscriptionOverlay } from "./transcription-overlay";
+import { TranslationSidebar } from "./translation-sidebar";
 
 type CallLayoutType = "grid" | "speaker-left" | "speaker-right";
 type STTProvider = "stream" | "webspeech" | "deepgram";
@@ -313,50 +314,23 @@ export const MeetingRoom = () => {
           </DropdownMenu>
         </div>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            className={cn(controlButtonClasses, "cursor-pointer")}
+        {/* Translation Sidebar */}
+        <TranslationSidebar 
+          selectedLanguage={translationLanguage} 
+          onLanguageSelect={setTranslationLanguage}
+        >
+          <div
+            className={cn(controlButtonClasses, "cursor-pointer flex items-center justify-center gap-1", {
+              "bg-emerald-500/20 text-emerald-400 border-emerald-500/50": translationLanguage !== "off"
+            })}
             title="Translator (Select Language)"
           >
-            <div className="flex items-center gap-1">
-              <Languages 
-                size={20} 
-                className={cn("text-white transition-colors", {
-                  "text-emerald-400": translationLanguage !== "off"
-                })} 
-              />
-              <ChevronDown size={14} className="text-white/50" />
-            </div>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="border-white/10 bg-black/90 text-white backdrop-blur-lg">
-            <div className="px-2 py-1.5 text-[10px] font-bold uppercase text-white/40">
-              Target Language
-            </div>
-            <DropdownMenuSeparator className="bg-white/10" />
-            <DropdownMenuItem
-              className={cn("cursor-pointer hover:bg-white/10", {
-                "bg-white/10 text-emerald-400": translationLanguage === "off"
-              })}
-              onClick={() => setTranslationLanguage("off")}
-            >
-              Translation Off
-            </DropdownMenuItem>
-            <DropdownMenuSeparator className="bg-white/10" />
-            {[
-              "Spanish", "French", "German", "Chinese", "Japanese", "Hindi"
-            ].map((lang) => (
-              <DropdownMenuItem
-                key={lang}
-                className={cn("cursor-pointer hover:bg-white/10", {
-                  "bg-white/10 text-emerald-400": translationLanguage === lang
-                })}
-                onClick={() => setTranslationLanguage(lang)}
-              >
-                {lang}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+            <Languages size={20} />
+            <ChevronDown size={14} className={cn("text-white/50", {
+              "text-emerald-400/50": translationLanguage !== "off"
+            })} />
+          </div>
+        </TranslationSidebar>
 
         <CallStatsButton />
 

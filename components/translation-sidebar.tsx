@@ -54,7 +54,19 @@ export function TranslationSidebar({
           </SheetDescription>
         </SheetHeader>
 
-        <div className="p-4 border-b border-white/10">
+        <div className="p-4 border-b border-white/10 space-y-4">
+          <Button
+            variant="outline"
+            onClick={() => handleSelect("off")}
+            className={cn(
+              "w-full justify-between h-auto py-3 px-4 border-white/10 bg-white/5 hover:bg-white/10 hover:text-white transition-colors",
+              selectedLanguage === "off" && "border-emerald-500/50 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-400"
+            )}
+          >
+            <span className="font-medium">Translation Off</span>
+            {selectedLanguage === "off" && <Check className="h-4 w-4" />}
+          </Button>
+
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
             <Input
@@ -70,7 +82,7 @@ export function TranslationSidebar({
           <div className="p-2">
             {filteredLanguages.length === 0 ? (
               <div className="p-8 text-center text-zinc-500 text-sm">
-                No languages found matching "{searchQuery}"
+                No languages found matching &quot;{searchQuery}&quot;
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-1">
