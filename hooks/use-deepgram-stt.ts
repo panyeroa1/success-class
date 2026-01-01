@@ -12,6 +12,7 @@ interface DeepgramTranscript {
 interface UseDeepgramSTTOptions {
   language?: string;
   model?: string;
+  sourceType?: "microphone" | "system";
 }
 
 interface UseDeepgramSTTReturn {
@@ -25,7 +26,7 @@ interface UseDeepgramSTTReturn {
 export function useDeepgramSTT(
   options: UseDeepgramSTTOptions = {}
 ): UseDeepgramSTTReturn {
-  const { language = "en", model = "nova-2" } = options;
+  const { language = "en", model = "nova-2", sourceType = "microphone" } = options;
 
   const [transcript, setTranscript] = useState<DeepgramTranscript | null>(null);
   const [isListening, setIsListening] = useState(false);
@@ -66,8 +67,19 @@ export function useDeepgramSTT(
       }
       const { key } = await tokenResponse.json();
 
-      // Get microphone access
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      let stream: MediaStream;
+      if (sourceType === "system") {
+          // Capture System Audio (requires video: true for getDisplayMedia, but checks for audio track)
+          stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+          if (stream.getAudioTracks().length === 0) {
+              stream.getTracks().forEach(t => t.stop());
+              throw new Error("No system audio detected. Please check 'Share Audio' tab/cbox.");
+          }
+      } else {
+          // Default Microphone
+          stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      }
+      
       streamRef.current = stream;
 
       // Connect to Deepgram WebSocket
@@ -128,7 +140,7 @@ export function useDeepgramSTT(
       setError(e instanceof Error ? e.message : "Failed to start Deepgram");
       stop();
     }
-  }, [language, model, stop]);
+  }, [language, model, sourceType, stop]);
 
   useEffect(() => {
     return () => {

@@ -53,6 +53,7 @@ export const MeetingRoom = () => {
   const [sttProvider, setSTTProvider] = useState<STTProvider>("stream");
   const [translationLanguage, setTranslationLanguage] = useState<string>("off");
   const [sbUserId, setSbUserId] = useState<string | null>(null);
+  const [sttSource, setSttSource] = useState<"microphone" | "system">("microphone");
 
   // Initialize early anonymous auth
   useEffect(() => {
@@ -87,7 +88,7 @@ export const MeetingRoom = () => {
   const webSpeech = useWebSpeechSTT({ language: "en-US", continuous: true });
 
   // Deepgram hook
-  const deepgram = useDeepgramSTT({ language: "en", model: "nova-2" });
+  const deepgram = useDeepgramSTT({ language: "en", model: "nova-2", sourceType: sttSource });
 
   // Determine if any caption system is active
   const isCaptionsActive =
@@ -317,6 +318,36 @@ export const MeetingRoom = () => {
               >
                 Deepgram (Cloud)
               </DropdownMenuItem>
+              
+              {/* Source Selection (Deepgram Only) */}
+              {sttProvider === "deepgram" && (
+                <>
+                  <DropdownMenuSeparator className="border-white/10" />
+                  <div className="px-2 py-1.5 text-xs font-semibold text-gray-400">
+                      Audio Source
+                  </div>
+                  <DropdownMenuItem
+                    className={cn(
+                      "cursor-pointer pl-6",
+                      sttSource === "microphone" && "text-emerald-400"
+                    )}
+                    onClick={() => setSttSource("microphone")}
+                  >
+                    Microphone
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className={cn(
+                      "cursor-pointer pl-6",
+                      sttSource === "system" && "text-emerald-400"
+                    )}
+                    onClick={() => setSttSource("system")}
+                    title="Share tab/screen audio"
+                  >
+                    System Audio (Share Tab)
+                  </DropdownMenuItem>
+                </>
+              )}
+
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

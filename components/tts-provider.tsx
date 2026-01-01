@@ -144,7 +144,9 @@ export function TTSProvider({ children, initialUserId }: { children: React.React
            throw new Error("Received empty or invalid audio blob from TTS provider");
       }
 
-      const audioUrl = URL.createObjectURL(audioBlob);
+      // Force valid MIME type for MP3
+      const validBlob = new Blob([audioBlob], { type: "audio/mpeg" });
+      const audioUrl = URL.createObjectURL(validBlob);
       const audioPlayer = new Audio(audioUrl);
       
       // Safety: Configure audio for broader compatibility
@@ -174,7 +176,7 @@ export function TTSProvider({ children, initialUserId }: { children: React.React
                   case err.MEDIA_ERR_ABORTED: msg = "Playback Aborted"; break;
                   case err.MEDIA_ERR_NETWORK: msg = "Network Error"; break;
                   case err.MEDIA_ERR_DECODE: msg = "Decoding Error (Bad Format)"; break;
-                  case err.MEDIA_ERR_SRC_NOT_SUPPORTED: msg = "Source Not Supported"; break;
+                  case err.MEDIA_ERR_SRC_NOT_SUPPORTED: msg = `Source Not Supported (${validBlob.type}, ${validBlob.size}b)`; break;
                   default: msg = `Unknown Media Error: ${err.message}`;
               }
           }
@@ -310,7 +312,7 @@ export function TTSProvider({ children, initialUserId }: { children: React.React
       if (mainLoopInterval) clearInterval(mainLoopInterval);
       cancelAnimationFrame(animationFrameId);
     };
-  }, [targetUserId, hasUserInteracted]);
+  }, [targetUserId, hasUserInteracted, selectedSinkId]);
 
   const enableAudio = () => {
     setHasUserInteracted(true);
