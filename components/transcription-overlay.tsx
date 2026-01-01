@@ -2,7 +2,6 @@
 
 import { useCallStateHooks } from "@stream-io/video-react-sdk";
 import { useEffect, useState, useRef, useCallback } from "react";
-import { saveTranscription } from "@/lib/transcription-service";
 import { getTranslation, saveTranslation } from "@/lib/translate-service";
 
 import { signInAnonymously } from "@/lib/supabase";
@@ -102,42 +101,29 @@ export const TranscriptionOverlay = ({
           setLines((prev) =>
             prev.map((l) => (l.id === line.id ? { ...l, translatedText: translatedText! } : l))
           );
-
-          // 2. Save translation to Supabase
-          // STRICT: Always prefer the Supabase ID (sbUserId) if available, as that's what TTS listens to.
-          const activeUserId = sbUserId || userId || line.speakerId || "anonymous";
-          const { success, error } = await saveTranslation({
-            user_id: activeUserId,
-            meeting_id: meetingId,
-            source_lang: "auto",
-            target_lang: targetLanguage,
-            original_text: originalText,
-            translated_text: translatedText,
-          });
-          
-          if (success) {
-            console.log(`[TranscriptionOverlay] Successfully SAVED to public.translations.`);
-          } else {
-            console.error(`[TranscriptionOverlay] FAILED to save to public.translations:`, error);
-          }
-          
-          return; // Flow complete
-        } else {
-          console.warn(`[TranscriptionOverlay] Translation returned EMPTY or NULL for language: ${targetLanguage}`);
         }
-      } else {
-        console.log(`[TranscriptionOverlay] Translation is OFF. Skipping translation flow.`);
       }
 
-      // 3. Fallback: Save as regular transcription if translation is off or failed
-      await saveTranscription({
-        user_id: userId || line.speakerId || "anonymous",
-        room_name: roomName,
-        sender: line.speaker,
-        text: originalText,
+      // 2. Save everything to translations table (Primary storage)
+      // STRICT: Always save to translations table as per user's provided schema
+      // This ensures the iframe player (which monitors this table) shows the text.
+      const activeUserId = sbUserId || userId || line.speakerId || "anonymous";
+      const { success, error } = await saveTranslation({
+        user_id: activeUserId,
+        meeting_id: meetingId,
+        source_lang: "auto",
+        target_lang: targetLanguage !== "off" ? targetLanguage : "original",
+        original_text: originalText,
+        translated_text: translatedText || originalText,
       });
+      
+      if (success) {
+        console.log(`[TranscriptionOverlay] Successfully SAVED to public.translations.`);
+      } else {
+        console.error(`[TranscriptionOverlay] FAILED to save to public.translations:`, error);
+      }
     },
-    [roomName, meetingId, userId, sbUserId, targetLanguage]
+    [meetingId, userId, sbUserId, targetLanguage]
   );
 
   // Trigger flow
