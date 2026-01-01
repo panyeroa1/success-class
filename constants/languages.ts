@@ -129,6 +129,40 @@ export const TARGET_LANGUAGES = [
   { value: "vi", label: "Vietnamese" },
   { value: "cy", label: "Welsh" },
   { value: "zu", label: "Zulu" },
+  // Philippines
+  { value: "tl", label: "Tagalog" },
+  { value: "fil", label: "Filipino" },
+  { value: "taglish", label: "Taglish (Tagalog-English Mix)" },
+  { value: "ceb", label: "Cebuano" },
+  { value: "ilo", label: "Ilocano" },
+  { value: "hil", label: "Hiligaynon" },
+  { value: "war", label: "Waray" },
+  { value: "pam", label: "Kapampangan" },
+  { value: "pag", label: "Pangasinan" },
+  { value: "bcl", label: "Bikol" },
+  { value: "mrn", label: "Maranao" },
+  { value: "mdh", label: "Maguindanao" },
+  { value: "tsg", label: "Tausug" },
+  // Belgium
+  { value: "nl-BE", label: "Flemish (Belgium)" }, // Explicit label for Flemish preference
+  { value: "wa", label: "Walloon" },
+  { value: "lb", label: "Luxembourgish" },
+  { value: "de-BE", label: "German (Belgium)" },
+  { value: "li", label: "Limburgish" },
+  { value: "vls", label: "West Flemish" },
+  { value: "pcd", label: "Picard" },
+  // Cameroon
+  { value: "en-CM", label: "English (Cameroon)" },
+  { value: "fr-CM", label: "French (Cameroon)" },
+  { value: "wes", label: "Cameroonian Pidgin English" },
+  { value: "camfranglais", label: "Camfranglais" },
+  { value: "ewo", label: "Ewondo" },
+  { value: "dua", label: "Duala" },
+  { value: "bas", label: "Basaa" },
+  { value: "ff-CM", label: "Fulfulde (Cameroon)" },
+  { value: "bum", label: "Bulu" },
+  { value: "bbj", label: "Ghomala'" },
+  { value: "byv", label: "Medumba" },
 ].sort((a, b) => a.label.localeCompare(b.label));
 
 export const SPEAKER_LANGUAGES = [
