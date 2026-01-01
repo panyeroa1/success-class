@@ -53,7 +53,7 @@ export default function TranscriptionsPage() {
           translationsData = data.translations || [];
         }
 
-        // Map transcriptions and their translations
+        // Map transcriptions and their translations (Correlating by text and meeting_id)
         const combined = transData.transcriptions.map((t: Transcription) => {
           const translation = translationsData.find(
             (tr) => tr.original_text === t.text && tr.meeting_id === t.room_name

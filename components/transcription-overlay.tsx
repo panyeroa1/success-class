@@ -73,7 +73,7 @@ export const TranscriptionOverlay = ({
             prev.map((l) => (l.id === line.id ? { ...l, translatedText: translatedText! } : l))
           );
 
-          // 2. Save both original and translated text to translations table
+          // 2. Save translation to Supabase (Strict SCHEMA alignment with meeting_id)
           await saveTranslation({
             user_id: userId || line.speakerId || "anonymous",
             meeting_id: meetingId,

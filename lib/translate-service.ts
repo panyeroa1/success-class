@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase";
 export interface TranslationEntry {
   id?: string;
   user_id: string;
-  meeting_id: string; // Added meeting_id
+  meeting_id: string;
   source_lang: string;
   target_lang: string;
   original_text: string;
