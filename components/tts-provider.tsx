@@ -56,6 +56,7 @@ export function TTSProvider({ children, initialUserId }: { children: React.React
   const isFetchingBuffer = useRef(false);
   const isMounted = useRef(true);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const isPolling = useRef(false);
 
   // Sync initial prop
   useEffect(() => {
@@ -205,12 +206,13 @@ export function TTSProvider({ children, initialUserId }: { children: React.React
           setNowPlaying(null);
         }
       }
-      playbackRAF = requestAnimationFrame(playbackManager);
+    playbackRAF = requestAnimationFrame(playbackManager);
     };
 
     const sentenceFinder = async () => {
-      if (!targetUserId || !isMounted.current) return;
+      if (!targetUserId || !isMounted.current || !hasUserInteracted || isPolling.current) return;
 
+      isPolling.current = true;
       try {
         const url = `${SUPABASE_REST_URL}?user_id=eq.${targetUserId}&select=translated_text,created_at&order=created_at.desc&limit=5`;
         const latestItems = await fetchSupabase(url);
@@ -249,6 +251,8 @@ export function TTSProvider({ children, initialUserId }: { children: React.React
         console.error("Sentence Finder Error:", error);
         setStatus(`Monitor Error: ${getErrorMessage(error)}`);
         setStatusType("error");
+      } finally {
+        isPolling.current = false;
       }
     };
 
@@ -282,7 +286,7 @@ export function TTSProvider({ children, initialUserId }: { children: React.React
         setStatus("Running...");
         bufferRAF = requestAnimationFrame(bufferManager);
         playbackRAF = requestAnimationFrame(playbackManager);
-        mainLoopInterval = setInterval(sentenceFinder, FETCH_INTERVAL_MS);
+        mainLoopInterval = setInterval(sentenceFinder, 4000); // 4s interval for less noise
       } catch (error: any) {
         setStatus(`Init Failed: ${getErrorMessage(error)}`);
         setStatusType("error");
