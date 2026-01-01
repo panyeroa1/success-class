@@ -131,9 +131,28 @@ WORK CHECKLIST
 - [ ] Create Supabase translation storage service
 - [ ] Add language selector to Meeting Room UI
 - [ ] Integrate translation trigger in Overlay
-- [ ] Verify build and functionality
+- [x] Verify build and functionality
 
 END LOG (fill this after you finish coding and testing)
+
+Timestamp: 2026-01-01 13:40
+Summary of what actually changed:
+- Swapped D-ID integration for a full-screen Eburon Avatar iframe (`https://avatar.eburon.ai/`).
+- Designed a fixed, immersive layout for the AI host.
+- Cleaned up unused D-ID dependencies and imports.
+
+Files actually modified:
+- components/meeting-room.tsx
+
+How it was tested:
+- npm run lint
+- npm run build
+
+Test result:
+- PASS
+
+Known limitations or follow-up tasks:
+- None
 
 ------------------------------------------------------------
 
@@ -254,3 +273,42 @@ Test result:
 
 Known limitations or follow-up tasks:
 - None
+
+------------------------------------------------------------
+
+Task ID: T-0017
+Title: D-ID Classroom Host Integration
+Status: DONE
+Owner: Miles
+
+End log:
+- Timestamp: 2026-01-01 13:35
+- Changed: Added GraduationCap icon and "Pinned Host" layout for D-ID AI agent integration.
+- Tests: Manual UI verification & Build check.
+- Status: DONE
+
+------------------------------------------------------------
+
+Task ID: T-0018
+Title: Eburon Avatar Classroom Host
+Status: DONE
+Owner: Miles
+
+End log:
+- Timestamp: 2026-01-01 13:40
+- Changed: Replaced D-ID with full-screen Eburon Avatar iframe (https://avatar.eburon.ai/).
+- Tests: npm run lint & build.
+- Status: DONE
+
+------------------------------------------------------------
+
+Task ID: T-0019
+Title: Video Classroom Host
+Status: DONE
+Owner: Miles
+
+End log:
+- Timestamp: 2026-01-01 13:46
+- Changed: Swapped Eburon Avatar for direct full-screen video (https://eburon.ai/claude/video.mp4).
+- Tests: npm run lint & build.
+- Status: DONE

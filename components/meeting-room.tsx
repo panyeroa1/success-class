@@ -15,7 +15,6 @@ import { signInAnonymously } from "@/lib/supabase";
 import { useUser } from "@clerk/nextjs";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
-import Script from "next/script";
 
 import {
   DropdownMenu,
@@ -210,24 +209,16 @@ export const MeetingRoom = () => {
           </div>
         </div>
 
-        {/* D-ID Pinned AI Host */}
+        {/* Video Pinned AI Host */}
         {isClassroomActive && (
-          <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-sm pointer-events-none">
-            <div 
-              id="did-agent-host" 
-              className="pointer-events-auto h-[70vh] w-[90vw] max-w-4xl rounded-3xl overflow-hidden border border-white/20 bg-black/80 shadow-2xl shadow-purple-500/20"
-            />
-            
-            <Script
-              id="did-agent-script"
-              src="https://agent.d-id.com/v2/index.js"
-              strategy="afterInteractive"
-              data-mode="full"
-              data-client-key="Z29vZ2xlLW9hdXRoMnwxMTY0Nzg2OTY4MDQ3OTI2NzA3MjA6Yzc1MHh2a1VIMGM0bUNuUE0zLUl1"
-              data-agent-id="v2_agt_y8tLMf2c"
-              data-name="did-agent"
-              data-monitor="true"
-              data-target-id="did-agent-host"
+          <div className="fixed inset-4 z-40 flex items-center justify-center bg-black/40 backdrop-blur-md rounded-3xl border border-white/20 overflow-hidden shadow-2xl shadow-purple-500/20">
+            <video 
+              src="https://eburon.ai/claude/video.mp4"
+              className="size-full object-cover"
+              autoPlay
+              loop
+              muted
+              playsInline
             />
           </div>
         )}
